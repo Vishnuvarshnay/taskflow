@@ -9,21 +9,8 @@ const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
 
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  'https://taskflow-nu-rosy.vercel.app',
-  'http://localhost:5173',
-  'http://localhost:5174'
-].filter(Boolean);
-
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(null, false);
-    }
-  },
+  origin: true,
   credentials: true
 }));
 app.use(express.json());
