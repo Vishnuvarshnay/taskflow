@@ -14,6 +14,10 @@ router.post('/signup', [
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
 ], async (req, res, next) => {
   try {
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ error: 'Server misconfigured: JWT secret missing' });
+    }
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
@@ -31,6 +35,9 @@ router.post('/signup', [
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.status(201).json({ token, user });
   } catch (err) {
+    if (err && err.code === 'P2002') {
+      return res.status(409).json({ error: 'Email already in use' });
+    }
     next(err);
   }
 });
@@ -41,6 +48,10 @@ router.post('/login', [
   body('password').notEmpty().withMessage('Password required'),
 ], async (req, res, next) => {
   try {
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ error: 'Server misconfigured: JWT secret missing' });
+    }
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
